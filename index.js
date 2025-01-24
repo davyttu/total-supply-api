@@ -27,25 +27,32 @@ const abi = [
 
 const contract = new web3.eth.Contract(abi, contractAddress);
 
-// Route racine pour vérifier que le serveur est actif
-app.get('/', (req, res) => {
-  res.send('Bienvenue sur l\'API Total Supply');
+// Fonction pour récupérer la valeur `totalSupply`
+async function getTotalSupply() {
+  const totalSupplyWei = await contract.methods.totalSupply().call();
+  const totalSupply = web3.utils
+    .toBN(totalSupplyWei)
+    .div(web3.utils.toBN(10).pow(web3.utils.toBN(18))) // Diviser par 10^18
+    .toString(); // Convertir en chaîne de caractères
+  return totalSupply;
+}
+
+// Endpoint racine (/) qui redirige vers la valeur de `totalSupply`
+app.get('/', async (req, res) => {
+  try {
+    const totalSupply = await getTotalSupply();
+    res.send(totalSupply); // Retourne directement la valeur numérique
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error fetching total supply');
+  }
 });
 
-// Endpoint pour récupérer la valeur totale
+// Endpoint dédié (optionnel) pour `total-supply`
 app.get('/total-supply', async (req, res) => {
   try {
-    // Récupération de la valeur `totalSupply` en wei
-    const totalSupplyWei = await contract.methods.totalSupply().call();
-
-    // Conversion de wei à un nombre sans décimales (diviser par 10^18)
-    const totalSupply = web3.utils
-      .toBN(totalSupplyWei)
-      .div(web3.utils.toBN(10).pow(web3.utils.toBN(18))) // Diviser par 10^18
-      .toString(); // Convertir en chaîne de caractères
-
-    // Renvoi de la valeur brute comme réponse
-    res.send(totalSupply);
+    const totalSupply = await getTotalSupply();
+    res.send(totalSupply); // Retourne la valeur numérique
   } catch (error) {
     console.error(error);
     res.status(500).send('Error fetching total supply');
