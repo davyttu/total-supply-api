@@ -1,0 +1,16 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "api/total-supply.js",
+        "use": "@vercel/node"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/total-supply",
+        "dest": "/api/total-supply.js"
+      }
+    ]
+  }
+  
