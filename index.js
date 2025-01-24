@@ -1,22 +1,30 @@
-// Importer le module express
 const express = require('express');
-
-// Créer une instance de l'application express
+const axios = require('axios');
 const app = express();
+const port = process.env.PORT || 3000;
 
-// Utiliser une variable pour récupérer le port (Vercel assigne dynamiquement un port)
-const port = process.env.PORT || 3000; // Si aucune variable d'environnement pour le port n'est définie, utiliser 3000
+// Récupérer la clé API depuis les variables d'environnement
+const apiKey = process.env.BASESCAN_API_KEY;
 
-// Route API pour récupérer le total supply de ton contrat
+// Une route simple qui appelle l'API BaseScan
 app.get('/total-supply', (req, res) => {
-    // Remplace cette valeur par la supply réelle de ton contrat
-    const totalSupply = 1000000000; // Exemple : total supply de ton token (à remplacer par la vraie valeur de ton contrat)
-    
-    // Retourner la valeur au format JSON
-    res.json({ totalSupply: totalSupply });
+  axios.get('https://api.basescan.org/api', {
+    params: {
+      module: 'account',
+      action: 'balance',
+      address: '0x438f3e402Cd1eEe3d2Fb4Fb79f7900e8DAFCbFdf', // Remplace par une adresse réelle 
+      apikey: apiKey
+    }
+  })
+  .then(response => {
+    res.json(response.data);
+  })
+  .catch(error => {
+    res.status(500).send('Error fetching data: ' + error.message);
+  });
 });
 
 // Démarrer le serveur
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });
