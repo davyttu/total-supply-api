@@ -1,30 +1,46 @@
 const express = require('express');
-const axios = require('axios');
+const Web3 = require('web3');
+
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000; // Port local pour l'application
 
-// Récupérer la clé API depuis les variables d'environnement
-const apiKey = process.env.BASESCAN_API_KEY;
+// Connexion au réseau Base (RPC officiel de Base)
+const web3 = new Web3('https://mainnet.base.org');
 
-// Une route simple qui appelle l'API BaseScan
-app.get('/total-supply', (req, res) => {
-  axios.get('https://api.basescan.org/api', {
-    params: {
-      module: 'account',
-      action: 'balance',
-      address: '0x438f3e402Cd1eEe3d2Fb4Fb79f7900e8DAFCbFdf', // Remplace par une adresse réelle 
-      apikey: apiKey
-    }
-  })
-  .then(response => {
-    res.json(response.data);
-  })
-  .catch(error => {
-    res.status(500).send('Error fetching data: ' + error.message);
-  });
+// Adresse du contrat et ABI
+const contractAddress = '0x438f3e402Cd1eEe3d2Fb4Fb79f7900e8DAFCbFdf'; // Adresse du contrat sur Base
+const abi = [
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "totalSupply",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+// Initialisation du contrat
+const contract = new web3.eth.Contract(abi, contractAddress);
+
+// Route API pour obtenir le totalSupply
+app.get('/total-supply', async (req, res) => {
+  try {
+    const totalSupply = await contract.methods.totalSupply().call();
+    res.json({ totalSupply });
+  } catch (error) {
+    console.error('Erreur lors de la récupération de totalSupply :', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération de totalSupply' });
+  }
 });
 
-// Démarrer le serveur
+// Lancement du serveur
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Serveur en cours d'exécution sur http://localhost:${port}`);
 });
