@@ -27,6 +27,11 @@ const abi = [
 
 const contract = new web3.eth.Contract(abi, contractAddress);
 
+// Route racine pour vérifier que le serveur est actif
+app.get('/', (req, res) => {
+  res.send('Bienvenue sur l\'API Total Supply');
+});
+
 // Endpoint pour récupérer la valeur totale
 app.get('/total-supply', async (req, res) => {
   try {
