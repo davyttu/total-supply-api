@@ -32,12 +32,20 @@ const contract = new web3.eth.Contract(abi, contractAddress);
 
 // Fonction pour récupérer la valeur `totalSupply`
 async function getTotalSupply() {
-  const totalSupplyWei = await contract.methods.totalSupply().call();
-  const totalSupply = web3.utils
-    .toBN(totalSupplyWei)
-    .div(web3.utils.toBN(10).pow(web3.utils.toBN(18))) // Diviser par 10^18
-    .toString(); // Convertir en chaîne de caractères
-  return totalSupply;
+  try {
+    console.log("Appel de la fonction totalSupply() sur le contrat...");
+    const totalSupplyWei = await contract.methods.totalSupply().call();
+    console.log("totalSupplyWei:", totalSupplyWei);
+    const totalSupply = web3.utils
+      .toBN(totalSupplyWei)
+      .div(web3.utils.toBN(10).pow(web3.utils.toBN(18))) // Diviser par 10^18
+      .toString(); // Convertir en chaîne de caractères
+    console.log("totalSupply:", totalSupply);
+    return totalSupply;
+  } catch (error) {
+    console.error("Erreur dans getTotalSupply:", error);
+    throw error; // Propager l'erreur pour la gérer dans la route
+  }
 }
 
 // Route pour vérifier si l'API fonctionne
@@ -48,6 +56,7 @@ app.get('/', (req, res) => {
 // Route pour récupérer la Total Supply
 app.get('/api.dws', async (req, res) => {
   try {
+    console.log("Requête reçue :", req.query);
     // Vérifier si le paramètre "q" est égal à "totalcoins"
     if (req.query.q === "totalcoins") {
       const totalSupply = await getTotalSupply();
@@ -58,7 +67,7 @@ app.get('/api.dws', async (req, res) => {
       res.status(400).send("Paramètre invalide. Utilisez ?q=totalcoins.");
     }
   } catch (error) {
-    console.error("Erreur lors du calcul de la Total Supply:", error);
+    console.error("Erreur dans la route /api.dws:", error);
     res.status(500).send("Erreur serveur");
   }
 });
