@@ -1,13 +1,15 @@
+require('dotenv').config(); // Charger les variables d'environnement
+
 const express = require('express');
-const { Web3 } = require('web3'); // Utilisation de la syntaxe ES6 pour importer Web3
+const { Web3 } = require('web3');
 
 const app = express();
 
 // Configuration de Web3 avec Infura
-const web3 = new Web3('https://base-mainnet.infura.io/v3/98eeedebb5c644399f17a9704b7519b5');
+const web3 = new Web3(`https://base-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`);
 
 // Adresse de votre contrat
-const contractAddress = '0x438f3e402Cd1eEe3d2Fb4Fb79f7900e8DAFCbFdf';
+const contractAddress = process.env.TOKEN_CONTRACT_ADDRESS;
 
 // ABI (Application Binary Interface) de votre contrat
 const abi = [
